@@ -54,6 +54,42 @@ func GetMessage(ctx context.Context, client *Client, channelID string, ts string
 	return result, nil
 }
 
+// ListChannelHistory fetches recent messages from a channel.
+func ListChannelHistory(ctx context.Context, client *Client, channelID string, limit int) ([]map[string]any, error) {
+	if limit <= 0 {
+		limit = 25
+	}
+	if limit > 200 {
+		limit = 200
+	}
+
+	resp, err := client.API(ctx, "conversations.history", map[string]string{
+		"channel": channelID,
+		"limit":   fmt.Sprintf("%d", limit),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("conversations.history: %w", err)
+	}
+
+	messages, _ := resp["messages"].([]any)
+	var out []map[string]any
+	for _, m := range messages {
+		msg, _ := m.(map[string]any)
+		if msg != nil {
+			out = append(out, msg)
+		}
+	}
+
+	// Sort chronologically (oldest first)
+	sort.Slice(out, func(i, j int) bool {
+		tsI, _ := out[i]["ts"].(string)
+		tsJ, _ := out[j]["ts"].(string)
+		return tsI < tsJ
+	})
+
+	return out, nil
+}
+
 // ListThread fetches all replies in a thread, paginated.
 func ListThread(ctx context.Context, client *Client, channelID string, threadTS string, limit int) ([]map[string]any, error) {
 	var allMessages []map[string]any

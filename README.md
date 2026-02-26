@@ -34,6 +34,12 @@ All output is JSON.
 # Get a single message
 slack-reader message get "#general" --workspace myteam --ts "1770165109.628379"
 
+# List recent channel messages
+slack-reader message list "#general" --workspace myteam
+
+# List recent channel messages with a limit
+slack-reader message list "#general" --workspace myteam --limit 50
+
 # List all messages in a thread
 slack-reader message list "#general" --workspace myteam --ts "1770165109.628379"
 
@@ -61,6 +67,7 @@ slack-reader channel list --workspace myteam --all --limit 100
 | `auth whoami` | Show current auth info (calls `auth.test`) |
 | `auth creds` | Import credentials from Slack Desktop |
 | `message get <channel> --ts <ts>` | Fetch a single message |
+| `message list <channel>` | List recent channel messages |
 | `message list <channel> --ts <ts>` | List all messages in a thread |
 | `channel list` | List conversations for current user |
 | `channel list --user "@handle"` | List conversations for a specific user |
@@ -76,10 +83,12 @@ slack-reader channel list --workspace myteam --all --limit 100
 
 | Flag | Commands | Description | Default |
 |------|----------|-------------|---------|
-| `--ts <timestamp>` | `message get`, `message list` | Message/thread timestamp (required) | - |
+| `--ts <timestamp>` | `message get` | Message timestamp (required) | - |
+| `--ts <timestamp>` | `message list` | Thread root timestamp; omit to list recent channel messages | - |
 | `--user <handle>` | `channel list` | List channels for a specific user | current user |
 | `--all` | `channel list` | List all workspace conversations | `false` |
-| `--limit <n>` | `channel list`, `message list` | Maximum results | `100` |
+| `--limit <n>` | `channel list` | Maximum results | `100` |
+| `--limit <n>` | `message list` | Maximum results (`0` = unlimited for threads, `25` for channel history) | `0` |
 
 ## License
 

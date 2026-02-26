@@ -65,10 +65,6 @@ Examples:
   slack-reader message list C0123ABC --workspace myteam --ts "1770165109.628379"`,
 	Args: cobra.ExactArgs(1),
 	Run: func(_ *cobra.Command, args []string) {
-		if messageTS == "" {
-			output.PrintError(errors.New("--ts is required"))
-		}
-
 		domain := requireWorkspace()
 		client, err := islack.NewClient(domain)
 		if err != nil {
@@ -81,7 +77,14 @@ Examples:
 			output.PrintError(err)
 		}
 
-		messages, err := islack.ListThread(ctx, client, channelID, messageTS, messageLimit)
+		var messages []map[string]any
+		if messageTS == "" {
+			// No --ts: list recent channel messages
+			messages, err = islack.ListChannelHistory(ctx, client, channelID, messageLimit)
+		} else {
+			// With --ts: list thread replies
+			messages, err = islack.ListThread(ctx, client, channelID, messageTS, messageLimit)
+		}
 		if err != nil {
 			output.PrintError(err)
 		}
