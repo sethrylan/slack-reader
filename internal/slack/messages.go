@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 )
 
 // MessageResult represents a single message fetch result.
@@ -65,7 +66,7 @@ func ListChannelHistory(ctx context.Context, client *Client, channelID string, l
 
 	resp, err := client.API(ctx, "conversations.history", map[string]string{
 		"channel": channelID,
-		"limit":   fmt.Sprintf("%d", limit),
+		"limit":   strconv.Itoa(limit),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("conversations.history: %w", err)
