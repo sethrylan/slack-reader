@@ -26,7 +26,18 @@ slack-reader auth whoami --workspace myteam
 
 All commands require `--workspace <domain>` where `<domain>` is the Slack team domain (the `<domain>` in `<domain>.slack.com`).
 
-All output is JSON.
+The default output format is JSON. Use `--output markdown` on `message list` for a human-readable format.
+
+### Timestamps
+
+The `--ts` flag accepts Slack timestamps with or without the dot separator:
+
+```
+1770165109.628379   (canonical format)
+1770165109628379    (concatenated digits)
+```
+
+Both forms are automatically normalized to the canonical `seconds.microseconds` format used by the Slack API.
 
 ### Messages
 
@@ -42,6 +53,12 @@ slack-reader message list "#general" --workspace myteam --limit 50
 
 # List all messages in a thread
 slack-reader message list "#general" --workspace myteam --ts "1770165109.628379"
+
+# Timestamps without the dot also work
+slack-reader message list "#general" --workspace myteam --ts "1770165109628379"
+
+# Output as markdown instead of JSON
+slack-reader message list "#general" --workspace myteam --ts "1770165109.628379" --output markdown
 
 # Channel IDs also work
 slack-reader message get C01ABCDEF --workspace myteam --ts "1770165109.628379"
@@ -83,8 +100,9 @@ slack-reader channel list --workspace myteam --all --limit 100
 
 | Flag | Commands | Description | Default |
 |------|----------|-------------|---------|
-| `--ts <timestamp>` | `message get` | Message timestamp (required) | - |
-| `--ts <timestamp>` | `message list` | Thread root timestamp; omit to list recent channel messages | - |
+| `--ts <timestamp>` | `message get` | Message timestamp (required); with or without dot | - |
+| `--ts <timestamp>` | `message list` | Thread root timestamp (with or without dot); omit to list recent channel messages | - |
+| `--output <format>` | `message list` | Output format: `json` or `markdown` | `json` |
 | `--user <handle>` | `channel list` | List channels for a specific user | current user |
 | `--all` | `channel list` | List all workspace conversations | `false` |
 | `--limit <n>` | `channel list` | Maximum results | `100` |
