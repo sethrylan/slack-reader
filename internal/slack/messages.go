@@ -6,7 +6,23 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 )
+
+// NormalizeTimestamp converts a Slack timestamp to the canonical
+// "seconds.microseconds" format. It accepts:
+//   - already-formatted: "1772147524.763449"
+//   - concatenated digits: "1772147524763449"
+func NormalizeTimestamp(ts string) string {
+	if strings.Contains(ts, ".") {
+		return ts
+	}
+	// Slack timestamps are 10-digit epoch seconds + 6-digit microseconds.
+	if len(ts) == 16 {
+		return ts[:10] + "." + ts[10:]
+	}
+	return ts
+}
 
 // MessageResult represents a single message fetch result.
 type MessageResult struct {
@@ -16,6 +32,7 @@ type MessageResult struct {
 
 // GetMessage fetches a single message by channel and timestamp.
 func GetMessage(ctx context.Context, client *Client, channelID string, ts string) (*MessageResult, error) {
+	ts = NormalizeTimestamp(ts)
 	resp, err := client.API(ctx, "conversations.history", map[string]string{
 		"channel":   channelID,
 		"latest":    ts,
@@ -118,6 +135,7 @@ func ListChannelHistory(ctx context.Context, client *Client, channelID string, l
 
 // ListThread fetches all replies in a thread, paginated.
 func ListThread(ctx context.Context, client *Client, channelID string, threadTS string, limit int) ([]map[string]any, error) {
+	threadTS = NormalizeTimestamp(threadTS)
 	var allMessages []map[string]any
 	cursor := ""
 
