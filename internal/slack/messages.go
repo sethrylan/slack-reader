@@ -31,7 +31,7 @@ type MessageResult struct {
 }
 
 // GetMessage fetches a single message by channel and timestamp.
-func GetMessage(ctx context.Context, client *Client, channelID string, ts string) (*MessageResult, error) {
+func GetMessage(ctx context.Context, client APIClient, channelID string, ts string) (*MessageResult, error) {
 	ts = NormalizeTimestamp(ts)
 	resp, err := client.API(ctx, "conversations.history", map[string]string{
 		"channel":   channelID,
@@ -73,7 +73,7 @@ func GetMessage(ctx context.Context, client *Client, channelID string, ts string
 }
 
 // ListChannelHistory fetches recent messages from a channel, paginated.
-func ListChannelHistory(ctx context.Context, client *Client, channelID string, limit int) ([]map[string]any, error) {
+func ListChannelHistory(ctx context.Context, client APIClient, channelID string, limit int) ([]map[string]any, error) {
 	unlimited := limit <= 0
 	if unlimited {
 		limit = 0
@@ -87,6 +87,9 @@ func ListChannelHistory(ctx context.Context, client *Client, channelID string, l
 		pageSize := 200
 		if !unlimited && limit-len(allMessages) < pageSize {
 			pageSize = limit - len(allMessages)
+		}
+		if pageSize <= 0 {
+			break
 		}
 
 		params := map[string]string{
@@ -110,17 +113,18 @@ func ListChannelHistory(ctx context.Context, client *Client, channelID string, l
 			}
 		}
 
+		// Stop if we've reached the requested limit.
+		if !unlimited && len(allMessages) >= limit {
+			allMessages = allMessages[:limit]
+			break
+		}
+
 		meta, _ := resp["response_metadata"].(map[string]any)
 		next, _ := meta["next_cursor"].(string)
 		if next == "" {
 			break
 		}
 		cursor = next
-
-		if !unlimited && len(allMessages) >= limit {
-			allMessages = allMessages[:limit]
-			break
-		}
 	}
 
 	// Sort chronologically (oldest first)
@@ -134,7 +138,7 @@ func ListChannelHistory(ctx context.Context, client *Client, channelID string, l
 }
 
 // ListThread fetches all replies in a thread, paginated.
-func ListThread(ctx context.Context, client *Client, channelID string, threadTS string, limit int) ([]map[string]any, error) {
+func ListThread(ctx context.Context, client APIClient, channelID string, threadTS string, limit int) ([]map[string]any, error) {
 	threadTS = NormalizeTimestamp(threadTS)
 	var allMessages []map[string]any
 	cursor := ""

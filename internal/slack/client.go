@@ -36,6 +36,11 @@ func (c *Client) ImportCreds() error {
 	return c.api.WithCookieAuth()
 }
 
+// APIClient defines the interface for making Slack API calls.
+type APIClient interface {
+	API(ctx context.Context, method string, params map[string]string) (map[string]any, error)
+}
+
 // API makes a POST request to the given Slack API method and unmarshals the response.
 func (c *Client) API(ctx context.Context, method string, params map[string]string) (map[string]any, error) {
 	body, err := c.api.API(ctx, "POST", method, params, nil)
