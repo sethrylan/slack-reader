@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	messageTS    string
-	messageLimit int
+	messageTS     string
+	messageLimit  int
+	messageOutput string
 )
 
 var messageCmd = &cobra.Command{
@@ -62,7 +63,8 @@ var messageListCmd = &cobra.Command{
 
 Examples:
   slack-reader message list "#general" --workspace myteam --ts "1770165109.628379"
-  slack-reader message list C0123ABC --workspace myteam --ts "1770165109.628379"`,
+  slack-reader message list C0123ABC --workspace myteam --ts "1770165109.628379"
+  slack-reader message list C0123ABC --workspace myteam --ts "1770165109.628379" --output markdown`,
 	Args: cobra.ExactArgs(1),
 	Run: func(_ *cobra.Command, args []string) {
 		domain := requireWorkspace()
@@ -89,6 +91,12 @@ Examples:
 			output.PrintError(err)
 		}
 
+		if messageOutput == "markdown" {
+			users := islack.NewUserProvider(client)
+			output.PrintMarkdown(messages, users)
+			return
+		}
+
 		output.PrintJSON(map[string]any{
 			"messages": messages,
 		})
@@ -99,6 +107,7 @@ func init() {
 	messageGetCmd.Flags().StringVar(&messageTS, "ts", "", "Message timestamp (required)")
 	messageListCmd.Flags().StringVar(&messageTS, "ts", "", "Thread root timestamp (required)")
 	messageListCmd.Flags().IntVar(&messageLimit, "limit", 0, "Maximum number of messages (0 = unlimited)")
+	messageListCmd.Flags().StringVar(&messageOutput, "output", "json", "Output format: json or markdown")
 
 	messageCmd.AddCommand(messageGetCmd)
 	messageCmd.AddCommand(messageListCmd)
