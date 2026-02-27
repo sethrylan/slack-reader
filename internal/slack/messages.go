@@ -72,40 +72,65 @@ func GetMessage(ctx context.Context, client *Client, channelID string, ts string
 	return result, nil
 }
 
-// ListChannelHistory fetches recent messages from a channel.
+// ListChannelHistory fetches recent messages from a channel, paginated.
 func ListChannelHistory(ctx context.Context, client *Client, channelID string, limit int) ([]map[string]any, error) {
-	if limit <= 0 {
-		limit = 25
-	}
-	if limit > 200 {
-		limit = 200
+	unlimited := limit <= 0
+	if unlimited {
+		limit = 0
 	}
 
-	resp, err := client.API(ctx, "conversations.history", map[string]string{
-		"channel": channelID,
-		"limit":   strconv.Itoa(limit),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("conversations.history: %w", err)
-	}
+	var allMessages []map[string]any
+	cursor := ""
 
-	messages, _ := resp["messages"].([]any)
-	var out []map[string]any
-	for _, m := range messages {
-		msg, _ := m.(map[string]any)
-		if msg != nil {
-			out = append(out, msg)
+	for {
+		// Fetch up to 200 per page (Slack API max)
+		pageSize := 200
+		if !unlimited && limit-len(allMessages) < pageSize {
+			pageSize = limit - len(allMessages)
+		}
+
+		params := map[string]string{
+			"channel": channelID,
+			"limit":   strconv.Itoa(pageSize),
+		}
+		if cursor != "" {
+			params["cursor"] = cursor
+		}
+
+		resp, err := client.API(ctx, "conversations.history", params)
+		if err != nil {
+			return nil, fmt.Errorf("conversations.history: %w", err)
+		}
+
+		messages, _ := resp["messages"].([]any)
+		for _, m := range messages {
+			msg, _ := m.(map[string]any)
+			if msg != nil {
+				allMessages = append(allMessages, msg)
+			}
+		}
+
+		meta, _ := resp["response_metadata"].(map[string]any)
+		next, _ := meta["next_cursor"].(string)
+		if next == "" {
+			break
+		}
+		cursor = next
+
+		if !unlimited && len(allMessages) >= limit {
+			allMessages = allMessages[:limit]
+			break
 		}
 	}
 
 	// Sort chronologically (oldest first)
-	sort.Slice(out, func(i, j int) bool {
-		tsI, _ := out[i]["ts"].(string)
-		tsJ, _ := out[j]["ts"].(string)
+	sort.Slice(allMessages, func(i, j int) bool {
+		tsI, _ := allMessages[i]["ts"].(string)
+		tsJ, _ := allMessages[j]["ts"].(string)
 		return tsI < tsJ
 	})
 
-	return out, nil
+	return allMessages, nil
 }
 
 // ListThread fetches all replies in a thread, paginated.
