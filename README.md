@@ -88,7 +88,7 @@ slack-reader channel list --workspace myteam --all --limit 100
 | `--user <handle>` | `channel list` | List channels for a specific user | current user |
 | `--all` | `channel list` | List all workspace conversations | `false` |
 | `--limit <n>` | `channel list` | Maximum results | `100` |
-| `--limit <n>` | `message list` | Maximum results (`0` = unlimited for threads, `25` for channel history) | `0` |
+| `--limit <n>` | `message list` | Maximum results (`0` = unlimited) | `0` |
 
 ## License
 

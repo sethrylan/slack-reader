@@ -58,12 +58,13 @@ Examples:
 
 var messageListCmd = &cobra.Command{
 	Use:   "list <channel>",
-	Short: "List all messages in a thread",
-	Long: `List all messages in a thread by channel and thread root timestamp.
+	Short: "List messages in a channel or thread",
+	Long: `List recent channel messages, or all messages in a thread by channel and thread root timestamp.
 
 Examples:
+  slack-reader message list "#general" --workspace myteam
+  slack-reader message list "#general" --workspace myteam --limit 500
   slack-reader message list "#general" --workspace myteam --ts "1770165109.628379"
-  slack-reader message list C0123ABC --workspace myteam --ts "1770165109.628379"
   slack-reader message list C0123ABC --workspace myteam --ts "1770165109.628379" --output markdown`,
 	Args: cobra.ExactArgs(1),
 	Run: func(_ *cobra.Command, args []string) {
