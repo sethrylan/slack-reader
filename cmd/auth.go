@@ -56,6 +56,19 @@ var authCredsCmd = &cobra.Command{
 	},
 }
 
+var authTokenCmd = &cobra.Command{
+	Use:   "token",
+	Short: "Print token and cookies from Slack Desktop (for use as SLACK_TOKEN and SLACK_COOKIES)",
+	Run: func(_ *cobra.Command, _ []string) {
+		domain := requireWorkspace()
+		auth, err := islack.GetCookieAuth(domain)
+		if err != nil {
+			output.PrintError(err)
+		}
+		output.PrintJSON(auth)
+	},
+}
+
 func requireWorkspace() string {
 	if workspace == "" {
 		output.PrintError(errors.New("--workspace is required (e.g., --workspace myteam)"))
@@ -66,5 +79,6 @@ func requireWorkspace() string {
 func init() {
 	authCmd.AddCommand(authWhoamiCmd)
 	authCmd.AddCommand(authCredsCmd)
+	authCmd.AddCommand(authTokenCmd)
 	rootCmd.AddCommand(authCmd)
 }
