@@ -5,9 +5,30 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	slackapi "github.com/rneatherway/slack"
 )
+
+// Auth holds the token and cookies needed for Slack API access.
+type Auth struct {
+	Token   string `json:"token"`
+	Cookies string `json:"cookies"`
+}
+
+// GetCookieAuth extracts the token and cookie from local Slack Desktop data.
+// Cookies are returned in URL-encoded query format (e.g. "d=xoxd-...") for use with SLACK_COOKIES.
+func GetCookieAuth(domain string) (*Auth, error) {
+	auth, err := slackapi.GetCookieAuth(domain)
+	if err != nil {
+		return nil, fmt.Errorf("authentication failed: %w", err)
+	}
+	vals := url.Values{}
+	for k, v := range auth.Cookies {
+		vals.Set(k, v)
+	}
+	return &Auth{Token: auth.Token, Cookies: vals.Encode()}, nil
+}
 
 // Client wraps the rneatherway/slack client for Slack API access.
 type Client struct {

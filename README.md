@@ -83,6 +83,7 @@ slack-reader channel list --workspace myteam --all --limit 100
 |---------|-------------|
 | `auth whoami` | Show current auth info (calls `auth.test`) |
 | `auth creds` | Import credentials from Slack Desktop |
+| `auth token` | Print token and cookies for use as env vars |
 | `message get <channel> --ts <ts>` | Fetch a single message |
 | `message list <channel>` | List recent channel messages |
 | `message list <channel> --ts <ts>` | List all messages in a thread |
