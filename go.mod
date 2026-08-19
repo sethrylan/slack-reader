@@ -3,7 +3,7 @@ module github.com/sethrylan/slack-reader
 go 1.25.5
 
 require (
-	github.com/rneatherway/slack v0.0.0-20251202152516-e4fa895c1c51
+	github.com/rneatherway/slack v0.0.0-20260818180516-40e320fd8d54
 	github.com/spf13/cobra v1.10.2
 )
 
@@ -19,9 +19,9 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/mod v0.3.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/tools v0.0.0-20201124115921-2c860bdd6e78 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
